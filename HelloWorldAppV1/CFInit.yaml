@@ -25,6 +25,19 @@ Mappings:
       AMI: ami-43874721
 
 Resources:
+  EC2InstanceSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Ports 22 (SSH) and 80 (HTTP)
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
   EC2Instance:
     Type: AWS::EC2::Instance
     Metadata:
@@ -51,7 +64,7 @@ Resources:
         - !Ref AWS::Region
         - AMI
       SecurityGroupIds:
-        - !Ref MySecurityGroup
+        - !Ref EC2InstanceSecGroup
       Tags:
         - Key: Name
           Value: !Ref NameOfService
@@ -64,19 +77,6 @@ Resources:
             yum install -y aws-cfn-bootstrap
             # Install the files and packages from the metadata
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region}
-  MySecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Open Ports 22 (SSH) and 80 (HTTP)
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: '22'
-        ToPort: '22'
-        CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: '80'
-        ToPort: '80'
-        CidrIp: 0.0.0.0/0
 
 Outputs:
   Website:
