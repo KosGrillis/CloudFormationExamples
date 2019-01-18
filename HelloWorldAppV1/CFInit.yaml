@@ -6,6 +6,7 @@ Parameters:
   NameOfService:
     Description: "The name of the service this stack is to be used for."
     Type: String
+    Default: "HelloWorldServiceV1"
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access into the server
     Type: AWS::EC2::KeyPair::KeyName
@@ -66,7 +67,7 @@ Resources:
   MySecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Open Ports 22 and 80
+      GroupDescription: Open Ports 22 (SSH) and 80 (HTTP)
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: '22'
