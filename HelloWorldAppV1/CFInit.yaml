@@ -4,7 +4,7 @@ Description: 'Sample CF template that generates a stack that hosts a very basic 
 
 Parameters:
   NameOfService:
-    Description: "The name of the service this stack is to be used for."
+    Description: The name of the service this stack is to be used for
     Type: String
     Default: "HelloWorldServiceV1"
   KeyName:
