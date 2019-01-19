@@ -1,0 +1,15 @@
+{
+  "Id": "Policy1547864301796",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1547864299674",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::helloworlds3bucket-s3bucket-1c0i6uwoenx1d/*",
+      "Principal": "*"
+    }
+  ]
+}
