@@ -1,4 +1,7 @@
 ---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creates an empty S3 Bucket.'
+
 Resources:
   s3Bucket:
     Type: AWS::S3::Bucket
