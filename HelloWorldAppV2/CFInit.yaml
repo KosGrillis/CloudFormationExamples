@@ -1,6 +1,6 @@
 ---
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Sample CF template that generates a stack that hosts a very basic hello world webpage, pulling files from a publically accessible S3 Bucket.'
+AWSTemplateFormatVersion: 2010-09-09
+Description: Sample CF template that generates a stack that hosts a very basic hello world webpage, pulling files from a publically accessible S3 Bucket.
 
 Parameters:
   NameOfService:

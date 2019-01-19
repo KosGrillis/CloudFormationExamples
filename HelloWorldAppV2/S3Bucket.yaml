@@ -1,11 +1,11 @@
 ---
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Creates an empty S3 Bucket.'
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates an empty S3 Bucket.
 
 Resources:
-  s3Bucket:
+  S3Bucket:
     Type: AWS::S3::Bucket
 Outputs:
   BucketName:
     Value:
-      Ref: s3Bucket
+      Ref: S3Bucket
