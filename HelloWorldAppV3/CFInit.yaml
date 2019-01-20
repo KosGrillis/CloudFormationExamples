@@ -1,0 +1,146 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Sample CF template that generates a stack that hosts a very basic hello world webpage, pulling files from a secured S3 Bucket.
+
+Parameters:
+  NameOfService:
+    Description: The name of the service this stack is to be used for
+    Type: String
+    Default: HelloWorldServiceV2
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access into the server
+    Type: AWS::EC2::KeyPair::KeyName
+  S3StackName:
+    Description: Name of S3 Stack
+    Type: String
+    Default: HelloWorldS3Stack
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-1853ac65
+    us-west-1:
+      AMI: ami-bf5540df
+    eu-west-1:
+      AMI: ami-3bfab942
+    ap-southeast-1:
+      AMI: ami-e2adf99e
+    ap-southeast-2:
+      AMI: ami-43874721
+
+Resources:
+
+  EC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+      Policies:
+        - PolicyName: EC2S3Perms
+          PolicyDocument:
+            Statement:
+              Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                Fn::Sub:
+                  - arn:aws:s3:::${bucketName}/*
+                  - bucketName:
+                      Fn::ImportValue:
+                        !Sub ${S3StackName}-s3Bucket
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: EC2InstanceRole
+
+  EC2InstanceSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Ports 22 and 80
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName: !Ref EC2InstanceRole
+          buckets:
+            -
+              Fn::ImportValue:
+                  !Sub "${S3StackName}-s3Bucket"
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            /var/www/html/index.html:
+              source:
+                Fn::Sub:
+                  - https://s3.amazonaws.com/${bucketName}/index.html
+                  - bucketName:
+                      Fn::ImportValue:
+                        !Sub "${S3StackName}-s3Bucket"
+            /var/www/html/styles.css:
+              source:
+                Fn::Sub:
+                  - https://s3.amazonaws.com/${bucketName}/styles.css
+                  - bucketName:
+                      Fn::ImportValue:
+                        !Sub "${S3StackName}-s3Bucket"
+            /var/www/html/script.js:
+              source:
+                Fn::Sub:
+                  - https://s3.amazonaws.com/${bucketName}/script.js
+                  - bucketName:
+                      Fn::ImportValue:
+                        !Sub "${S3StackName}-s3Bucket"
+          services:
+            sysvinit:
+              httpd:
+                enabled: true
+                ensureRunning: true
+    Properties:
+      InstanceType: t2.micro
+      ImageId:
+        Fn::FindInMap:
+        - RegionMap
+        - !Ref AWS::Region
+        - AMI
+      SecurityGroupIds:
+        - !Ref EC2InstanceSecGroup
+      Tags:
+        - Key: Name
+          Value: !Ref NameOfService
+      KeyName: !Ref KeyName
+      UserData:
+        'Fn::Base64':
+          !Sub |
+            #!/bin/bash -xe
+            # Ensure AWS CFN Bootstrap is the latest
+            yum install -y aws-cfn-bootstrap
+            # Install the files and packages from the metadata
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2Instance  --region ${AWS::Region}
+
+Outputs:
+  Website:
+    Description: The Public DNS for the EC2 Instance
+    Value: !Sub 'http://${EC2Instance.PublicDnsName}'

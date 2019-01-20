@@ -1,0 +1,16 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates an empty S3 Bucket and exports it
+
+Resources:
+  s3Bucket:
+    Type: AWS::S3::Bucket
+
+Outputs:
+  bucket:
+    Description: "The S3 Bucket"
+    Value:
+      Ref: "s3Bucket"
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-s3Bucket"
