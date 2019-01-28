@@ -6,7 +6,7 @@ Parameters:
   NameOfService:
     Description: The name of the service this stack is to be used for
     Type: String
-    Default: HelloWorldServiceV2
+    Default: HelloWorldServiceV3
   KeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access into the server
     Type: AWS::EC2::KeyPair::KeyName
@@ -119,6 +119,7 @@ Resources:
                 enabled: true
                 ensureRunning: true
     Properties:
+      IamInstanceProfile: !Ref EC2InstanceProfile
       InstanceType: t2.micro
       ImageId:
         Fn::FindInMap:
